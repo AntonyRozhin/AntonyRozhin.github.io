@@ -1,0 +1,31 @@
+---
+// Общий каркас всех страниц: <head> с мета-тегами, глобальные стили, <main> со слотом.
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Картинка для og:image — обрабатывается в этапе 8 */
+  ogImage?: ImageMetadata;
+  /** Цель Метрики, отправляемая при загрузке страницы, — обрабатывается в этапе 8 */
+  goalOnLoad?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+  </head>
+  <body>
+    <main>
+      <slot />
+    </main>
+    {/* Футер (Footer.astro) подключается здесь в этапе 4 */}
+  </body>
+</html>
