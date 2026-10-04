@@ -1,4 +1,4 @@
-# Portfolio — сайт-портфолио PM (Astro 6, статика)
+# Portfolio — сайт-портфолио PM (Astro 7, статика)
 
 ## ВАЖНО
 - **ВСЕГДА** читай @memory-bank/tech-stack.md перед написанием любого кода.
@@ -60,7 +60,7 @@ Git уже настроен владельцем — `user.name`/`user.email` и
 - Зависимости: `astro`, `@astrojs/sitemap`, `@fontsource-variable/*`, dev — `@astrojs/check`, `typescript`. Новый пакет — только если без него требование не закрыть; ставить с точной версией (`save-exact` в `site/.npmrc`).
 
 ## Gotchas
-- Astro 6: конфиг коллекций в `site/src/content.config.ts` с `glob()`-loader; `entry.id` вместо `entry.slug`; `render()` из `astro:content`; `z` из `astro/zod`.
+- Astro 7: конфиг коллекций в `site/src/content.config.ts` с `glob()`-loader; `entry.id` вместо `entry.slug`; `render()` из `astro:content`; `z` из `astro/zod`.
 - `sitemap.xml` и абсолютные `og:image` — только при заданном `SITE_URL`; без него сборка должна проходить чисто.
 - Подписи к картинкам делает свой плагин `site/src/lib/rehype-figure.mjs` (`title` → `<figcaption>`), Astro сам этого не умеет.
 - Метрика грузится только при заданном `metrikaId`; цель `case_open` отправляется при загрузке страницы кейса, не по клику.
