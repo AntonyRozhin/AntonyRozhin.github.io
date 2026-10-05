@@ -1,5 +1,6 @@
 ---
 // Нейтральная заглушка вместо картинки: фон из палитры, заданные пропорции, подпись по центру.
+// Декоративная (aria-hidden): подпись дублирует данные рядом (компания) или ничего не сообщает («Фото»).
 interface Props {
   /** Подпись по центру, например «Фото» или название компании */
   label: string;
@@ -10,7 +11,7 @@ interface Props {
 const { label, ratio } = Astro.props;
 ---
 
-<div class="placeholder" style={`aspect-ratio: ${ratio}`}>
+<div class="placeholder" style={`aspect-ratio: ${ratio}`} aria-hidden="true">
   <span class="label">{label}</span>
 </div>
 

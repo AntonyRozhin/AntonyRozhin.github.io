@@ -1,5 +1,6 @@
 ---
 // Секция кейсов на главной: заголовок и широкие карточки, по одной в ряд.
+// Карточки плавно появляются при прокрутке (см. скрипт ниже).
 import { getPublishedCases } from '../lib/cases';
 import CaseCard from './CaseCard.astro';
 
@@ -9,9 +10,44 @@ const cases = await getPublishedCases();
 <section id="cases" class="cases" aria-labelledby="cases-title">
   <h2 id="cases-title" class="heading">Кейсы</h2>
   <div class="list">
-    {cases.map((entry, index) => <CaseCard entry={entry} eager={index === 0} />)}
+    {
+      cases.map((entry, index) => (
+        <div class="item" data-reveal>
+          <CaseCard entry={entry} eager={index === 0} />
+        </div>
+      ))
+    }
   </div>
 </section>
+
+{/*
+  Появление при прокрутке. Скрытое состояние включает сам скрипт классом js-reveal
+  на <html> — без JS (или без IntersectionObserver) карточки видны сразу.
+  При prefers-reduced-motion скрипт ничего не делает.
+*/}
+<script is:inline>
+  (function () {
+    if (!('IntersectionObserver' in window)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var items = document.querySelectorAll('[data-reveal]');
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: '0px 0px -8% 0px' }
+    );
+
+    document.documentElement.classList.add('js-reveal');
+    items.forEach(function (item) {
+      observer.observe(item);
+    });
+  })();
+</script>
 
 <style>
   .cases {
@@ -28,6 +64,20 @@ const cases = await getPublishedCases();
   .list {
     display: grid;
     gap: var(--space-8);
+  }
+
+  /* Анимируется обёртка, а не карточка — ховер карточки (transform) не конфликтует */
+  :global(html.js-reveal) .item {
+    opacity: 0;
+    translate: 0 1.5rem;
+    transition:
+      opacity 600ms ease,
+      translate 600ms ease;
+  }
+
+  :global(html.js-reveal) .item.is-visible {
+    opacity: 1;
+    translate: none;
   }
 
   @media (min-width: 1024px) {

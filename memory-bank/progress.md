@@ -226,3 +226,25 @@ npm run build                                   # без sitemap, без og:imag
 SITE_URL=https://example.com npm run build      # dist/sitemap-index.xml, sitemap-0.xml (12 адресов), абсолютные og:url/og:image
 # Метрика: временно metrikaId: '12345678' в site.ts → npm run dev → /?_ym_debug=1, клики по CV/LinkedIn/Telegram/email, страница кейса → case_open
 ```
+
+---
+
+## Этап 9. Анимации, доступность, работа без JavaScript — 05.10.2026
+
+**Сделано**
+- `CaseList.astro` — появление карточек при прокрутке: каждая карточка обёрнута в `<div class="item" data-reveal>`; инлайн-скрипт с `IntersectionObserver` ставит `js-reveal` на `<html>` и добавляет `is-visible` обёрткам, попавшим в окно (opacity 0→1, `translate` 1.5rem→0, 600ms).
+- `ImagePlaceholder.astro` — `aria-hidden="true"`: заглушки декоративные, подпись дублирует компанию из соседнего текста.
+- `public/favicon.ico` — иконка «АР» (16/32/48 px, PNG внутри ICO).
+
+**Решения**
+- **Без JS ничего не скрыто:** скрытое состояние описано только под `html.js-reveal`, а этот класс ставит сам скрипт. Нет `IntersectionObserver` или включён `prefers-reduced-motion` — скрипт выходит, карточки видны сразу.
+- Анимируется обёртка, а не `.card`: у карточки свой `transform` для ховера; анимация через отдельное свойство `translate` на обёртке не конфликтует с ним.
+- Контраст (WCAG): текст/фон 17.3:1, второстепенный/фон 6.3:1, второстепенный/подложка 5.7:1, акцент/фон 6.4:1, белый/акцент 6.7:1 — всё ≥ 4.5:1.
+- **`favicon.ico` возвращён.** PDF-просмотрщик браузера (вкладка с CV) не видит `<link rel="icon">` и запрашивает `/favicon.ico`; без файла браузер показывал закэшированный логотип Astro. ICO собран без пакетов: `qlmanage -t -s 256` рендерит `favicon.svg` в PNG, `sips -z` — размеры 16/32/48, короткий Python-скрипт упаковывает PNG в ICO. **При смене иконки пересобрать оба файла** (`favicon.svg` и `favicon.ico`) и поднять `?v=` в `Base.astro`.
+
+**Как проверить**
+```bash
+cd site && npm run dev
+# прокрутка главной — плавное появление; DevTools → Rendering → prefers-reduced-motion: reduce — карточки сразу;
+# Disable JavaScript — всё видно; Tab: CV → LinkedIn → Telegram → карточки → футер; /cv.pdf в инкогнито — иконка «АР»
+```

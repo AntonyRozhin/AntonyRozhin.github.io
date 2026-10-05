@@ -300,3 +300,25 @@ site/
 
 ### `public/robots.txt`
 Разрешает индексацию всего сайта. При деплое добавить строку `Sitemap: <SITE_URL>/sitemap-index.xml`.
+
+## Этап 9 — анимации и доступность
+
+```
+site/
+  public/favicon.ico          ← иконка «АР» для PDF-просмотрщика и старых браузеров
+  src/components/
+    CaseList.astro            ← + обёртки data-reveal и скрипт появления
+    ImagePlaceholder.astro    ← + aria-hidden
+```
+
+### `src/components/CaseList.astro` (появление при прокрутке)
+- Разметка: `.list > .item[data-reveal] > CaseCard`.
+- Инлайн-скрипт (`is:inline`, ~20 строк, единственный JS сайта кроме Метрики): выходит, если нет `IntersectionObserver` или включён `prefers-reduced-motion`; иначе ставит `html.js-reveal`, наблюдает за `[data-reveal]` (`rootMargin` −8% снизу), при пересечении добавляет `.is-visible` и прекращает наблюдение.
+- CSS: `:global(html.js-reveal) .item` — `opacity: 0; translate: 0 1.5rem`; `.is-visible` — исходное состояние; переход 600ms. Без класса на `<html>` правил нет — контент виден всегда.
+- `translate` (отдельное CSS-свойство), а не `transform`, и на обёртке, а не на карточке, — чтобы не пересекаться с ховер-эффектом `CaseCard`.
+
+### `src/components/ImagePlaceholder.astro` (изменение)
+- Корень с `aria-hidden="true"`: заглушка не озвучивается экранными чтецами (подпись — повтор компании или «Фото»).
+
+### `public/favicon.ico`
+- ICO с тремя PNG (16/32/48) — растровая копия `favicon.svg`. Нужен, потому что браузерный просмотр PDF (`/cv.pdf`) и некоторые клиенты запрашивают `/favicon.ico` напрямую, без `<link rel="icon">`. В `Base.astro` подключён только SVG.
