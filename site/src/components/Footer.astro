@@ -82,7 +82,7 @@ const year = new Date().getFullYear();
   /* Десктоп: имя и город слева, контакты справа, © под ними */
   @media (min-width: 768px) {
     .inner {
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto minmax(0, 1fr);
       align-items: start;
     }
 

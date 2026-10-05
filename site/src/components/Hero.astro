@@ -137,7 +137,7 @@ const links = [
   /* Десктоп: текст слева, фото справа */
   @media (min-width: 1024px) {
     .hero {
-      grid-template-columns: 1fr minmax(18rem, 25rem);
+      grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem);
       align-items: center;
       gap: var(--space-16);
       padding-top: var(--space-24);

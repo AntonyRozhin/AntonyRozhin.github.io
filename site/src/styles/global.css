@@ -80,7 +80,8 @@ body {
   font-size: var(--text-base);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-wrap: break-word;
+  /* anywhere (а не break-word) уменьшает и min-content: длинное слово не распирает grid/flex-колонки */
+  overflow-wrap: anywhere;
 }
 
 h1,

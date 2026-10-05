@@ -148,7 +148,7 @@ const href = `/cases/${entry.id}/`;
   /* Десктоп: текст слева, визуал справа (~57% ширины) */
   @media (min-width: 1024px) {
     .card {
-      grid-template-columns: 1fr 1.35fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
       align-items: stretch;
       gap: var(--space-8);
       padding: var(--space-6);
