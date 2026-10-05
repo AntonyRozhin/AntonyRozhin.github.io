@@ -143,3 +143,38 @@ site/src/
 
 ### `src/pages/index.astro`
 Временно: `Base` с `title` = «{name} — {role}» и `description` = `site.seoDescription`, внутри — `<ol>` заголовков из `getPublishedCases()`. В этапе 4 добавится Hero, в этапе 5 список заменится на `CaseList`.
+
+## Этап 4 — hero и футер
+
+```
+site/src/
+  components/
+    ImagePlaceholder.astro    ← заглушка вместо картинки
+    Hero.astro                ← первый экран главной
+    Footer.astro              ← футер всех страниц
+  layouts/Base.astro          ← + Footer, flex-раскладка body
+  pages/index.astro           ← Hero + временный список кейсов
+```
+
+### `src/components/ImagePlaceholder.astro`
+- **Вход:** `label` (текст по центру), `ratio` (строка для CSS `aspect-ratio`, напр. `"4/5"`, `"16/10"`).
+- **Выход:** `<div>` на всю ширину родителя с заданными пропорциями; фон — `--color-surface` + штриховка цветом `--color-line`; подпись в «пилюле» цвета фона. Пропорции задаются инлайн-стилем, т. к. зависят от пропса.
+- Используется: `Hero` (фото, «Фото», 4/5); в этапе 5 — `CaseCard` (обложка, название компании, 16/10).
+
+### `src/components/Hero.astro`
+- **Данные:** только `site` (пропсов нет).
+- Кнопки описаны массивом `links` (`label`, `href`, `goal`, `primary`) и рендерятся одним `map` — одинаковая разметка и атрибуты у всех трёх. CV — `site.cvPath`, Telegram — `https://t.me/${site.telegram}`.
+- `data-goal` (`cv_click`, `linkedin_click`, `telegram_click`) — для делегированного обработчика Метрики в этапе 8.
+- Фото: при `site.photo` — `<Image>` из `astro:assets` (адаптивные `widths`/`sizes`, `loading="eager"` — это первый экран, 4/5 через `object-fit: cover`); иначе `ImagePlaceholder`.
+- Раскладка — CSS grid: одна колонка; с 1024px — `1fr | minmax(18rem, 25rem)`. Секция с `aria-labelledby` на `<h1>`.
+- Кнопки — `min-height: 2.75rem` (≈44px, удобная цель касания); ховер основной кнопки затемняет акцент через `color-mix()` — без новых HEX.
+
+### `src/components/Footer.astro`
+- **Данные:** только `site`. Подключается в `Base.astro`, поэтому есть на всех страницах автоматически.
+- `phoneHref` строится из `site.phone` удалением всего, кроме цифр и `+`; без `phone` пункт не выводится.
+- Внешние ссылки (Telegram, LinkedIn) — новая вкладка + `rel="noopener noreferrer"`; у email/Telegram/LinkedIn — `data-goal`.
+- Раскладка: grid в одну колонку; с 768px — «имя+город | контакты», © во всю ширину.
+
+### `src/layouts/Base.astro` (изменения)
+- После `<main>` выводится `<Footer />`.
+- Scoped-стиль: `body` — flex-колонка, `main { flex: 1 }` — футер прижат к низу окна (важно для 404 и коротких страниц).

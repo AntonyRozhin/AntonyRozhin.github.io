@@ -1,6 +1,7 @@
 ---
-// Общий каркас всех страниц: <head> с мета-тегами, глобальные стили, <main> со слотом.
+// Общий каркас всех страниц: <head> с мета-тегами, глобальные стили, <main> со слотом, футер.
 import '../styles/global.css';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   title: string;
@@ -26,6 +27,18 @@ const { title, description } = Astro.props;
     <main>
       <slot />
     </main>
-    {/* Футер (Footer.astro) подключается здесь в этапе 4 */}
+    <Footer />
   </body>
 </html>
+
+<style>
+  /* Футер прижат к низу окна даже на коротких страницах (404) */
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+  }
+</style>

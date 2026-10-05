@@ -1,0 +1,97 @@
+---
+// Футер всех страниц: имя, город, контакты, ©. Данные — из site.ts.
+import { site } from '../config/site';
+
+// Для tel: оставляем только цифры и +
+const phoneHref = site.phone ? `tel:${site.phone.replace(/[^\d+]/g, '')}` : undefined;
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="inner">
+    <div class="who">
+      <p class="name">{site.name}</p>
+      <p class="city">{site.city}</p>
+    </div>
+
+    <ul class="contacts">
+      <li>
+        <a href={`mailto:${site.email}`} data-goal="email_click">{site.email}</a>
+      </li>
+      {
+        phoneHref && (
+          <li>
+            <a href={phoneHref}>{site.phone}</a>
+          </li>
+        )
+      }
+      <li>
+        <a href={`https://t.me/${site.telegram}`} target="_blank" rel="noopener noreferrer" data-goal="telegram_click">@{site.telegram}</a>
+      </li>
+      <li>
+        <a href={site.linkedin} target="_blank" rel="noopener noreferrer" data-goal="linkedin_click">LinkedIn</a>
+      </li>
+    </ul>
+
+    <p class="copy">© {year} {site.name}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--color-line);
+    font-size: var(--text-sm);
+  }
+
+  .inner {
+    display: grid;
+    gap: var(--space-6);
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: var(--space-12) var(--gutter);
+  }
+
+  .name {
+    color: var(--color-text);
+    font-size: var(--text-base);
+    font-weight: 700;
+  }
+
+  .city,
+  .copy {
+    color: var(--color-text-muted);
+  }
+
+  .contacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    list-style: none;
+  }
+
+  .contacts a {
+    color: var(--color-text);
+    text-decoration-color: var(--color-line);
+  }
+
+  .contacts a:hover {
+    color: var(--color-accent);
+    text-decoration-color: currentColor;
+  }
+
+  /* Десктоп: имя и город слева, контакты справа, © под ними */
+  @media (min-width: 768px) {
+    .inner {
+      grid-template-columns: auto 1fr;
+      align-items: start;
+    }
+
+    .contacts {
+      justify-content: flex-end;
+    }
+
+    .copy {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

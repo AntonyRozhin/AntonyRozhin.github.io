@@ -1,0 +1,151 @@
+---
+// Первый экран главной: имя, роль, описание, кнопки CV / LinkedIn / Telegram, фото.
+// Все данные — из site.ts.
+import { Image } from 'astro:assets';
+import { site } from '../config/site';
+import ImagePlaceholder from './ImagePlaceholder.astro';
+
+const links = [
+  { label: 'CV', href: site.cvPath, goal: 'cv_click', primary: true },
+  { label: 'LinkedIn', href: site.linkedin, goal: 'linkedin_click', primary: false },
+  { label: 'Telegram', href: `https://t.me/${site.telegram}`, goal: 'telegram_click', primary: false },
+];
+---
+
+<section class="hero" aria-labelledby="hero-name">
+  <div class="text">
+    <h1 id="hero-name" class="name">{site.name}</h1>
+    <p class="role">{site.role}</p>
+    <p class="about">{site.about}</p>
+    <ul class="buttons">
+      {
+        links.map((link) => (
+          <li>
+            <a
+              class:list={['btn', { 'btn-primary': link.primary }]}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-goal={link.goal}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="photo">
+    {
+      site.photo ? (
+        <Image
+          class="photo-img"
+          src={site.photo}
+          alt={`Фото: ${site.name}`}
+          widths={[320, 480, 640, 800]}
+          sizes="(min-width: 1024px) 400px, 22rem"
+          loading="eager"
+        />
+      ) : (
+        <ImagePlaceholder label="Фото" ratio="4/5" />
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-12);
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: var(--space-12) var(--gutter) var(--space-16);
+  }
+
+  .name {
+    font-size: var(--text-display);
+  }
+
+  .role {
+    margin-top: var(--space-3);
+    color: var(--color-accent);
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .about {
+    max-width: 36em;
+    margin-top: var(--space-6);
+    color: var(--color-text-muted);
+    font-size: var(--text-base);
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+    list-style: none;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-6);
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color var(--transition),
+      color var(--transition),
+      background-color var(--transition);
+  }
+
+  .btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .btn-primary {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  .btn-primary:hover {
+    background: color-mix(in srgb, var(--color-accent) 85%, black);
+    color: var(--color-on-accent);
+  }
+
+  .photo {
+    width: 100%;
+    max-width: 22rem;
+  }
+
+  .photo-img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  /* Десктоп: текст слева, фото справа */
+  @media (min-width: 1024px) {
+    .hero {
+      grid-template-columns: 1fr minmax(18rem, 25rem);
+      align-items: center;
+      gap: var(--space-16);
+      padding-top: var(--space-24);
+      padding-bottom: var(--space-24);
+    }
+
+    .photo {
+      max-width: none;
+    }
+  }
+</style>
