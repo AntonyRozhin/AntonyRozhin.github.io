@@ -1,0 +1,74 @@
+---
+// Метрики результатов: value крупно и контрастно, label мелко и спокойно.
+// Если результатов нет — компонент ничего не выводит.
+interface Result {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  results?: Result[];
+  /** Сколько первых результатов показать; без limit — все */
+  limit?: number;
+  /** card — компактно в карточке, header — крупнее в шапке кейса */
+  variant: 'card' | 'header';
+}
+
+const { results = [], limit, variant } = Astro.props;
+const items = limit === undefined ? results : results.slice(0, limit);
+---
+
+{
+  items.length > 0 && (
+    <ul class:list={['results', variant]}>
+      {items.map((item) => (
+        <li class="item">
+          <span class="value">{item.value}</span>
+          <span class="label">{item.label}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-8);
+    list-style: none;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    max-width: 15em;
+  }
+
+  .value {
+    color: var(--color-accent);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .label {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.35;
+  }
+
+  .card .value {
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  }
+
+  .header {
+    gap: var(--space-6) var(--space-12);
+  }
+
+  .header .value {
+    font-size: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+</style>

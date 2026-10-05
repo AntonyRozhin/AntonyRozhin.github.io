@@ -178,3 +178,36 @@ site/src/
 ### `src/layouts/Base.astro` (изменения)
 - После `<main>` выводится `<Footer />`.
 - Scoped-стиль: `body` — flex-колонка, `main { flex: 1 }` — футер прижат к низу окна (важно для 404 и коротких страниц).
+
+## Этап 5 — карточки кейсов
+
+```
+site/src/
+  components/
+    ResultList.astro          ← метрики результатов (card | header)
+    CaseCard.astro            ← карточка кейса
+    CaseList.astro            ← секция #cases
+  pages/index.astro           ← Hero + CaseList
+```
+
+Поток: `getPublishedCases()` → `CaseList` → `CaseCard` (×N) → `ResultList` / `ImagePlaceholder` / `<Image>`.
+
+### `src/components/ResultList.astro`
+- **Вход:** `results?` (массив `{ value, label }` из frontmatter), `limit?`, `variant: 'card' | 'header'`.
+- **Выход:** `<ul class="results card|header">` с `<li>` → `.value` (крупно, акцент, без переноса) + `.label` (мелко, приглушённо). При пустом списке — ничего, ни обёртки, ни отступа.
+- Варианты различаются только размером цифр и промежутками. `card` — в карточке (лимит 3), `header` — в шапке кейса (этап 6, все до 4).
+- Внешний отступ сверху задаёт родитель (`CaseCard` — через `:global(.results)`), чтобы компонент не тянул лишнее место туда, где он стоит вплотную.
+
+### `src/components/CaseCard.astro`
+- **Вход:** `entry: CaseEntry`, `eager: boolean`.
+- **Выход:** `<article class="card" data-case-card>` → `.text` (h3>a, meta, summary, ResultList, «Посмотреть кейс →») + `.visual` (обложка или заглушка). Ссылка — `/cases/${entry.id}/`.
+- Растянутая ссылка: единственный `<a>` в заголовке, его `::after` покрывает карточку целиком; на нём же рисуется фокус-обводка.
+- Обложка: `<Image>` с `widths` 480–1280 и `sizes` (640px на десктопе, 100vw ниже), `loading` по `eager`, 16/10 + `object-fit: cover`. Без `cover` — `ImagePlaceholder` (`label` = компания, `ratio` = 16/10).
+- Раскладка: grid в одну колонку, визуал сверху (`order: -1`); с 1024px — `1fr | 1.35fr` (визуал ≈57%), визуал справа.
+- Ховер: подъём на 3px, тень, акцентная рамка и заголовок, лёгкий zoom обложки; всё через `transition`, глушится `prefers-reduced-motion` из `global.css`.
+- Атрибут `data-case-card` — для автоматических проверок (подсчёт карточек в `dist/`).
+
+### `src/components/CaseList.astro`
+- Данные — `getPublishedCases()` (пропсов нет): порядок по `order`, `draft` скрыты.
+- `<section id="cases">` — цель ссылки «← Все кейсы» (`/#cases`) со страниц кейсов; `scroll-margin-top` даёт небольшой отступ при переходе по якорю.
+- Первой карточке `eager={true}` — её обложка может попасть в первый экран; остальные ленивые.

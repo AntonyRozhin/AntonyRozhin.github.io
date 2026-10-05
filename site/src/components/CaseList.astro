@@ -1,0 +1,38 @@
+---
+// Секция кейсов на главной: заголовок и широкие карточки, по одной в ряд.
+import { getPublishedCases } from '../lib/cases';
+import CaseCard from './CaseCard.astro';
+
+const cases = await getPublishedCases();
+---
+
+<section id="cases" class="cases" aria-labelledby="cases-title">
+  <h2 id="cases-title" class="heading">Кейсы</h2>
+  <div class="list">
+    {cases.map((entry, index) => <CaseCard entry={entry} eager={index === 0} />)}
+  </div>
+</section>
+
+<style>
+  .cases {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: var(--space-8) var(--gutter) var(--space-24);
+    scroll-margin-top: var(--space-4);
+  }
+
+  .heading {
+    margin-bottom: var(--space-8);
+  }
+
+  .list {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 1024px) {
+    .list {
+      gap: var(--space-12);
+    }
+  }
+</style>

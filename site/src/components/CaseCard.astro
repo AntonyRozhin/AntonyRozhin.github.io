@@ -1,0 +1,165 @@
+---
+// Широкая карточка кейса на главной. Кликабельна вся карточка: одна ссылка
+// (заголовок), растянутая псевдоэлементом на всю площадь.
+import { Image } from 'astro:assets';
+import type { CaseEntry } from '../lib/cases';
+import ImagePlaceholder from './ImagePlaceholder.astro';
+import ResultList from './ResultList.astro';
+
+interface Props {
+  entry: CaseEntry;
+  /** Грузить обложку сразу (первая карточка), остальные — лениво */
+  eager: boolean;
+}
+
+const { entry, eager } = Astro.props;
+const { title, summary, company, year, results, cover, coverAlt } = entry.data;
+const href = `/cases/${entry.id}/`;
+---
+
+<article class="card" data-case-card>
+  <div class="text">
+    <h3 class="title">
+      <a class="link" href={href}>{title}</a>
+    </h3>
+    <p class="meta">{`${company} · ${year}`}</p>
+    <p class="summary">{summary}</p>
+    <ResultList results={results} limit={3} variant="card" />
+    <span class="more" aria-hidden="true">Посмотреть кейс →</span>
+  </div>
+
+  <div class="visual">
+    {
+      cover ? (
+        <Image
+          class="cover"
+          src={cover}
+          alt={coverAlt ?? ''}
+          widths={[480, 720, 960, 1280]}
+          sizes="(min-width: 1024px) 640px, 100vw"
+          loading={eager ? 'eager' : 'lazy'}
+        />
+      ) : (
+        <ImagePlaceholder label={company} ratio="16/10" />
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-4);
+    border: 1px solid var(--color-line);
+    border-radius: calc(var(--radius) + var(--space-2));
+    background: var(--color-bg);
+    transition:
+      transform var(--transition),
+      box-shadow var(--transition),
+      border-color var(--transition);
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
+    box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--color-text) 30%, transparent);
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: 0 var(--space-2) var(--space-2);
+  }
+
+  .title {
+    font-size: var(--text-lg);
+  }
+
+  /* Единственная ссылка карточки; ::after растягивает её на всю карточку */
+  .link {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .card:hover .link {
+    color: var(--color-accent);
+  }
+
+  /* Фокус с клавиатуры обводит всю карточку */
+  .link:focus-visible {
+    outline: none;
+  }
+
+  .link:focus-visible::after {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: calc(var(--radius) + var(--space-2));
+  }
+
+  .meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .summary {
+    max-width: 34em;
+  }
+
+  .text :global(.results) {
+    margin-top: var(--space-3);
+  }
+
+  .more {
+    margin-top: auto;
+    padding-top: var(--space-4);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  /* Визуал сверху на мобильных и планшетах */
+  .visual {
+    order: -1;
+    overflow: hidden;
+    border-radius: var(--radius);
+  }
+
+  .cover {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    transition: transform 400ms ease;
+  }
+
+  .card:hover .cover {
+    transform: scale(1.03);
+  }
+
+  /* Десктоп: текст слева, визуал справа (~57% ширины) */
+  @media (min-width: 1024px) {
+    .card {
+      grid-template-columns: 1fr 1.35fr;
+      align-items: stretch;
+      gap: var(--space-8);
+      padding: var(--space-6);
+    }
+
+    .text {
+      padding: var(--space-4) 0 var(--space-2) var(--space-2);
+    }
+
+    .visual {
+      order: 0;
+    }
+  }
+</style>

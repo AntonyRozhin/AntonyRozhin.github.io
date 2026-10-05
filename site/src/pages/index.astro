@@ -1,25 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import CaseList from '../components/CaseList.astro';
 import { site } from '../config/site';
-import { getPublishedCases } from '../lib/cases';
-
-const cases = await getPublishedCases();
 ---
 
 <Base title={`${site.name} — ${site.role}`} description={site.seoDescription}>
   <Hero />
-
-  {/* ВРЕМЕННЫЙ список кейсов (шаг 3.8) — заменяется на CaseList в этапе 5 */}
-  <ol class="temp-cases">
-    {cases.map((entry) => <li>{entry.data.title}</li>)}
-  </ol>
+  <CaseList />
 </Base>
-
-<style>
-  .temp-cases {
-    max-width: var(--content-max);
-    margin: 0 auto;
-    padding: 0 var(--gutter) var(--space-16) calc(var(--gutter) + 1.5em);
-  }
-</style>
