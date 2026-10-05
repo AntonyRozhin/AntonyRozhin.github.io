@@ -2,6 +2,41 @@
 
 Актуальное устройство проекта: файлы, их назначение и связи. Дополняется после каждого этапа.
 
+## Итоговая карта файлов (Этап 11)
+
+Всё ниже — фактические пути относительно `Portfolio/`. Подробности по каждому файлу — в разделах этапов ниже.
+
+| Файл | Назначение | Вход → выход |
+|---|---|---|
+| `.gitignore` | Исключения git для всего репозитория | — |
+| `site/package.json`, `site/package-lock.json` | 5 зависимостей с точными версиями, скрипты `dev`/`build`/`preview` | — |
+| `site/.nvmrc`, `site/.npmrc` | Node 24; `save-exact=true` | — |
+| `site/astro.config.mjs` | `site` из `SITE_URL` (env или `site/.env`), sitemap при `SITE_URL`, Markdown-процессор `satteri` + `rehype-figure` | env → конфиг сборки |
+| `site/tsconfig.json` | Строгий TypeScript Astro | — |
+| `site/src/config/site.ts` | Общие данные: имя, роль, описание, контакты, CV, Метрика, SEO | → `Base`, `Hero`, `Footer`, страницы |
+| `site/src/content.config.ts` | Схема коллекции `cases`, проверка обложки | `.md` → типизированные записи |
+| `site/src/content/cases/<slug>.md` | 11 кейсов: frontmatter + тело | → коллекция |
+| `site/src/lib/cases.ts` | `getPublishedCases()`, `getNextCase(id)` | коллекция → списки |
+| `site/src/lib/rehype-figure.mjs` | HAST-плагин Sätteri: `<img title>` → `<figure>` + `<figcaption>` | дерево Markdown → дерево |
+| `site/src/styles/global.css` | Шрифт Manrope, токены, сброс, база, фокус, reduced motion | → все страницы через `Base` |
+| `site/src/layouts/Base.astro` | `<head>` (мета, OG, favicon, Метрика), слот `header`, `<main>`, `Footer` | `title`, `description`, `ogImage?`, `goalOnLoad?` |
+| `site/src/components/ImagePlaceholder.astro` | Декоративная заглушка картинки | `label`, `ratio` |
+| `site/src/components/ResultList.astro` | Метрики результатов | `results?`, `limit?`, `variant` |
+| `site/src/components/Hero.astro` | Первый экран главной | `site` |
+| `site/src/components/CaseCard.astro` | Карточка кейса (`data-case-card`) | `entry`, `eager` |
+| `site/src/components/CaseList.astro` | Секция `#cases` + анимация появления | `getPublishedCases()` |
+| `site/src/components/Footer.astro` | Футер всех страниц | `site` |
+| `site/src/components/CaseHeader.astro` | Фиксированная шапка кейса | `entry` |
+| `site/src/components/NextCase.astro` | «Следующий кейс» | `entry` (следующий) |
+| `site/src/pages/index.astro` | Главная: `Hero` + `CaseList` | — |
+| `site/src/pages/cases/[slug].astro` | Страница кейса: панель, шапка, тело, «Следующий кейс» | `getStaticPaths` |
+| `site/src/pages/404.astro` | Страница «не найдено» | — |
+| `site/public/cv.pdf` | Копия CV из корня | — |
+| `site/public/favicon.svg`, `site/public/favicon.ico` | Иконка «АР» (SVG для страниц, ICO для PDF и старых клиентов) | — |
+| `site/public/robots.txt` | Разрешение индексации | — |
+
+Временная `src/pages/design-preview.astro` (этап 2) удалена. Картинок в `src/assets/` пока нет — папки `src/assets/cases/<slug>/` и `src/assets/profile/` создаются вместе с первыми картинками.
+
 ## Корень `Portfolio/`
 
 ```
