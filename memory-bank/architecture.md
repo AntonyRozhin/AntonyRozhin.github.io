@@ -105,3 +105,41 @@ SVG 64×64: скруглённый квадрат цвета акцента и �
 
 ### `src/pages/index.astro`
 Временная главная на `Base` с текстом «Сайт в разработке». В этапе 3 станет временным списком кейсов, в этапах 4–5 — настоящей главной.
+
+## Этап 3 — данные и контент
+
+```
+site/src/
+  config/site.ts              ← общие данные сайта
+  content.config.ts           ← схема коллекции cases
+  content/cases/<slug>.md     ← 11 кейсов, один файл = один кейс
+  lib/cases.ts                ← выборка и порядок кейсов
+  pages/index.astro           ← временный список кейсов
+```
+
+Поток данных: `content/cases/*.md` → (схема `content.config.ts`) → `lib/cases.ts` → страницы/компоненты. Общие данные: `config/site.ts` → `Base`, `Hero`, `Footer` (этап 4+). Тексты живут только в `.md` и `site.ts`; компоненты их лишь отображают.
+
+### `src/config/site.ts`
+- Экспортирует интерфейс `SiteConfig` и объект `site: SiteConfig`. Обязательные поля (`name`, `role`, `about`, `city`, `email`, `telegram`, `linkedin`, `cvPath`, `seoDescription`) обязательны в типе — пропуск ловит `astro check`. Необязательные: `photo?: ImageMetadata` (импорт картинки из `src/assets/profile/`), `phone?`, `metrikaId?`.
+- `telegram` — ник без `@`; `phone` — в человекочитаемом виде, `tel:`-ссылку компонент строит сам, оставляя цифры и `+`.
+- Обычный TS-модуль, а не коллекция: данных мало, а типизация TS проще схемы.
+
+### `src/content.config.ts`
+- Коллекция `cases`: `glob({ pattern: '**/*.md', base: './src/content/cases' })`; `entry.id` = имя файла без `.md` = slug в URL.
+- Схема (Требования 7.2): обязательные `title`, `summary`, `company`, `year` (непустые строки), `order` (число); необязательные `role`, `duration`, `results` (≤ 4 пар `{ value, label }`), `cover`, `coverAlt`; `draft` по умолчанию `false`. Правило `.refine`: при `cover` обязателен `coverAlt` (ошибка вешается на поле `coverAlt`).
+- `requiredText(field)` — фабрика строкового поля с русскими сообщениями.
+- `cover: z.preprocess(checkCoverExists, image())` — сначала проверка, что файл существует (относительно `src/content/cases/`, т. е. относительно `.md`), затем штатный `image()`, который превращает путь в `ImageMetadata` для `<Image />`. Без проверки Astro сообщал бы о битом пути без имени кейса.
+- Ошибки схемы при сборке выглядят как `InvalidContentEntryDataError: cases → <slug> … <поле>: <сообщение>` с путём к `.md`.
+
+### `src/content/cases/*.md`
+- Один файл на кейс; frontmatter по схеме, тело — свободный Markdown (рендер в этапе 6 через `render()`).
+- Заглушки — строка `[Заглушка: дописать]`, только в теле.
+- Картинки кейса будут лежать в `src/assets/cases/<slug>/`, путь в `cover` — `../../assets/cases/<slug>/cover.png`.
+
+### `src/lib/cases.ts`
+- `type CaseEntry = CollectionEntry<'cases'>`.
+- `getPublishedCases()` — `getCollection('cases', !draft)`, сортировка по `order` по возрастанию. Единственный источник списка кейсов: главная, `getStaticPaths` страниц кейсов и «Следующий кейс» используют его, поэтому `draft` и порядок работают везде одинаково.
+- `getNextCase(id)` — следующий опубликованный кейс по кругу; `undefined`, если опубликован один кейс или `id` не найден (тогда блок «Следующий кейс» не выводится).
+
+### `src/pages/index.astro`
+Временно: `Base` с `title` = «{name} — {role}» и `description` = `site.seoDescription`, внутри — `<ol>` заголовков из `getPublishedCases()`. В этапе 4 добавится Hero, в этапе 5 список заменится на `CaseList`.
