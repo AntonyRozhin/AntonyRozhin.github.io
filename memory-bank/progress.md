@@ -144,3 +144,32 @@ cd site && npm run build
 grep -o "data-case-card" dist/index.html | wc -l   # 11
 npm run dev   # клики по карточке → /cases/<slug>/, Tab по карточкам, ширины 1440/1024/1023/768/360
 ```
+
+---
+
+## Этап 6. Страница кейса — 05.10.2026
+
+**Сделано**
+- `src/pages/cases/[slug].astro` — `getStaticPaths()` из `getPublishedCases()` (slug = `entry.id`), тело через `render()`, `Base` с title «<кейс> — Антон Рожин» и description = `summary`. Верхняя панель «← Все кейсы» (`/#cases`) + имя (`/`). Стили тела кейса (`.prose`).
+- `src/components/CaseHeader.astro` — мета (только заданные поля через « · »), `<h1>`, `summary`, `ResultList variant="header"` (все результаты), обложка (`<Image>`, eager) или `ImagePlaceholder` 16/9.
+- `src/components/NextCase.astro` — «Следующий кейс»: название, компания · год, стрелка; выводится, только если `getNextCase()` что-то вернул.
+- `src/lib/rehype-figure.mjs` — HAST-плагин Sätteri: `<p>` с единственным `<img title>` → `<figure><img><figcaption>`.
+- `astro.config.mjs` — `markdown.processor: satteri({ hastPlugins: [rehypeFigure()] })`.
+- `Base.astro` — именованный слот `header` перед `<main>`.
+
+**Решения и отклонения**
+- **Плагин подписей без собственной рекурсии.** В Sätteri обход дерева делает движок (`element: { filter: ['p'], visit }`), а менять дерево можно только через `ctx.replaceNode` — ручная рекурсия по `node.children` изменений не применит. Пункт требований «обход дерева рекурсией» выполнен средствами движка.
+- Плагин стоит до встроенного `image-marker` Astro, поэтому новый `<img>` внутри `<figure>` всё равно оптимизируется (проверено: WebP, 153 → 54 КБ). `title` с картинки снимается — он уже в подписи, всплывающая подсказка была бы дублем.
+- `satteri` импортируется из `@astrojs/markdown-satteri` — прямая зависимость `astro`, отдельно не устанавливается (как в документации Astro 7). При обновлении Astro проверять, что импорт жив.
+- Верхняя панель — `<header>` вне `<main>` через именованный слот `Base` (`slot="header"`); отдельный компонент не заводился — панель есть только на странице кейса.
+- Ширины тела: каждый прямой потомок `.prose` — `max-width: var(--text-max)` по центру; `<figure>` и `<p>` с картинкой — `var(--media-max)`.
+- Обложка в шапке не обрезается (естественные пропорции) — макеты обычно нельзя кадрировать; в карточке на главной — 16/10 с `object-fit: cover`.
+- После изменения `astro.config.mjs` dev-сервер перезапускается сам.
+
+**Как проверить**
+```bash
+cd site && npm run build
+ls dist/cases | wc -l                                   # 11
+grep -o "Банк Санкт-Петербург · 2025 · Product Manager" dist/cases/card-delivery/index.html
+# подписи: временно добавить в .md ![alt](../../assets/cases/<slug>/x.png "Подпись") → в HTML <figure>…<figcaption>
+```

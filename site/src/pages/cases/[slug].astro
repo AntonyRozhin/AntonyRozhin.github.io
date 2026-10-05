@@ -1,0 +1,133 @@
+---
+// Страница кейса: верхняя панель, фиксированная шапка из frontmatter,
+// тело из Markdown, «Следующий кейс». Страница на каждый опубликованный кейс.
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CaseHeader from '../../components/CaseHeader.astro';
+import NextCase from '../../components/NextCase.astro';
+import { site } from '../../config/site';
+import { getNextCase, getPublishedCases, type CaseEntry } from '../../lib/cases';
+
+export async function getStaticPaths() {
+  const cases = await getPublishedCases();
+  return cases.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props {
+  entry: CaseEntry;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const next = await getNextCase(entry.id);
+---
+
+<Base title={`${entry.data.title} — ${site.name}`} description={entry.data.summary}>
+  <header slot="header" class="topbar">
+    <nav class="topbar-inner" aria-label="Навигация">
+      <a class="back" href="/#cases">← Все кейсы</a>
+      <a class="owner" href="/">{site.name}</a>
+    </nav>
+  </header>
+
+  <article>
+    <CaseHeader entry={entry} />
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  {next && <NextCase entry={next} />}
+</Base>
+
+<style>
+  .topbar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: var(--space-4) var(--gutter);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .topbar a {
+    padding-block: var(--space-2);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .topbar a:hover {
+    color: var(--color-accent);
+  }
+
+  /* Тело кейса: текст узкой колонкой, картинки шире текста */
+  .prose {
+    padding: var(--space-12) var(--gutter) var(--space-16);
+  }
+
+  .prose > :global(*) {
+    max-width: var(--text-max);
+    margin-inline: auto;
+  }
+
+  .prose > :global(* + *) {
+    margin-top: var(--space-4);
+  }
+
+  .prose :global(h2) {
+    margin-top: var(--space-12);
+    font-size: var(--text-xl);
+    scroll-margin-top: var(--space-4);
+  }
+
+  .prose :global(h3) {
+    margin-top: var(--space-8);
+    font-size: var(--text-lg);
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.4em;
+  }
+
+  .prose :global(li + li) {
+    margin-top: var(--space-2);
+  }
+
+  .prose :global(li::marker) {
+    color: var(--color-accent);
+  }
+
+  .prose :global(blockquote) {
+    padding-left: var(--space-6);
+    border-left: 3px solid var(--color-accent);
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .prose :global(strong) {
+    font-weight: 700;
+  }
+
+  .prose > :global(figure),
+  .prose > :global(p:has(> img)) {
+    max-width: var(--media-max);
+    margin-block: var(--space-12);
+  }
+
+  .prose :global(img) {
+    margin-inline: auto;
+    border-radius: var(--radius);
+  }
+
+  .prose :global(figcaption) {
+    max-width: var(--text-max);
+    margin: var(--space-3) auto 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+</style>

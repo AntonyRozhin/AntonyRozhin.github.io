@@ -211,3 +211,48 @@ site/src/
 - Данные — `getPublishedCases()` (пропсов нет): порядок по `order`, `draft` скрыты.
 - `<section id="cases">` — цель ссылки «← Все кейсы» (`/#cases`) со страниц кейсов; `scroll-margin-top` даёт небольшой отступ при переходе по якорю.
 - Первой карточке `eager={true}` — её обложка может попасть в первый экран; остальные ленивые.
+
+## Этап 6 — страница кейса
+
+```
+site/
+  astro.config.mjs            ← + markdown.processor: satteri({ hastPlugins })
+  src/
+    pages/cases/[slug].astro  ← страница кейса
+    components/
+      CaseHeader.astro        ← фиксированная шапка
+      NextCase.astro          ← «Следующий кейс»
+    lib/rehype-figure.mjs     ← подписи к картинкам
+    layouts/Base.astro        ← + слот header
+```
+
+Поток страницы кейса: `getPublishedCases()` → `getStaticPaths` (одна страница на кейс) → `render(entry)` (Markdown → HTML через Sätteri + `rehype-figure`) → `Base` [слот header: верхняя панель] → `CaseHeader` + `.prose > <Content/>` → `NextCase` (из `getNextCase`) → `Footer`.
+
+### `src/pages/cases/[slug].astro`
+- `getStaticPaths()` — по записи на каждый опубликованный кейс: `params.slug = entry.id`, `props.entry`. Черновики не попадают в список → страница не создаётся.
+- `render(entry)` из `astro:content` даёт `<Content />` — тело Markdown. Порядок и набор секций полностью задаются `.md`.
+- Верхняя панель: `<header slot="header">` → `<nav>` «← Все кейсы» (`/#cases`) и имя (`/`).
+- `.prose` — стили Markdown-тела через `:global()` (HTML тела рендерится вне scoped-области компонента): текстовая колонка `--text-max`, `<figure>`/`<p>` с картинкой — `--media-max`, отступы между блоками, заголовки, списки, цитаты, `figcaption`.
+
+### `src/components/CaseHeader.astro`
+- **Вход:** `entry`. **Выход:** `<header class="case-header">` внутри `<article>`.
+- `meta` = `[company, year, role, duration].filter(Boolean).join(' · ')` — пустые поля пропускаются, висящих разделителей нет.
+- Единственный `<h1>` страницы — название кейса.
+- `ResultList` без `limit` (все до 4), `variant="header"`.
+- Обложка: `<Image>` (`widths` 640–2200, `sizes` до 1100px, `loading="eager"` — первый экран), без обрезки; без `cover` — `ImagePlaceholder` 16/9 с компанией.
+
+### `src/components/NextCase.astro`
+- **Вход:** `entry` — следующий кейс. Сам не решает, показываться ли: страница вызывает его только при непустом `getNextCase()` (при одном опубликованном кейсе блока нет).
+- `<nav aria-label="Следующий кейс">` с одной ссылкой-плашкой: подпись, название, «компания · год», стрелка.
+
+### `src/lib/rehype-figure.mjs`
+- Экспортирует фабрику `rehypeFigure()` → определение HAST-плагина Sätteri `{ name, element: { filter: ['p'], visit } }`.
+- `visit(p)`: если в абзаце (без пробельных текстов) ровно один `<img>` с непустым `title` — `ctx.replaceNode(p, figure)`, где `figure` = новый `<img>` (без `title`) + `<figcaption>` с текстом `title`. Иначе ничего не делает.
+- Порядок плагинов в Astro: подсветка кода → пользовательские (`rehype-figure`) → `image-marker` (оптимизация картинок) → id заголовков. Поэтому картинка в `<figure>` оптимизируется как обычно.
+- Имя файла с «rehype» сохранено по плану; по сути это HAST-плагин Sätteri (то же дерево hast).
+
+### `astro.config.mjs`
+- `markdown.processor: satteri({ hastPlugins: [rehypeFigure()] })` — замена процессора по умолчанию на такой же `satteri()`, но с нашим плагином. `satteri` импортируется из `@astrojs/markdown-satteri` (зависимость `astro`).
+
+### `src/layouts/Base.astro` (изменения)
+- `<slot name="header" />` перед `<main>` — для верхней панели страницы кейса; на главной не используется.

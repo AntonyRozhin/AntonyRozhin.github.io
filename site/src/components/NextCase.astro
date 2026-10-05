@@ -1,0 +1,86 @@
+---
+// Блок «Следующий кейс» внизу страницы кейса. Вызывается, только если следующий кейс есть.
+import type { CaseEntry } from '../lib/cases';
+
+interface Props {
+  /** Следующий кейс (результат getNextCase) */
+  entry: CaseEntry;
+}
+
+const { entry } = Astro.props;
+const { title, company, year } = entry.data;
+---
+
+<nav class="next" aria-label="Следующий кейс">
+  <a class="link" href={`/cases/${entry.id}/`}>
+    <span class="eyebrow">Следующий кейс</span>
+    <span class="title">{title}</span>
+    <span class="meta">{`${company} · ${year}`}</span>
+    <span class="arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+
+<style>
+  .next {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: 0 var(--gutter) var(--space-16);
+  }
+
+  .link {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2) var(--space-6);
+    align-items: center;
+    padding: var(--space-8);
+    border: 1px solid var(--color-line);
+    border-radius: calc(var(--radius) + var(--space-2));
+    color: var(--color-text);
+    text-decoration: none;
+    transition:
+      border-color var(--transition),
+      transform var(--transition);
+  }
+
+  .link:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
+    transform: translateY(-3px);
+  }
+
+  .eyebrow,
+  .meta {
+    grid-column: 1;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .eyebrow {
+    font-weight: 600;
+  }
+
+  .title {
+    grid-column: 1;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    hyphens: auto;
+  }
+
+  .link:hover .title {
+    color: var(--color-accent);
+  }
+
+  .arrow {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    color: var(--color-accent);
+    font-size: var(--text-xl);
+    transition: transform var(--transition);
+  }
+
+  .link:hover .arrow {
+    transform: translateX(4px);
+  }
+</style>

@@ -1,0 +1,94 @@
+---
+// Фиксированная шапка страницы кейса: мета, название, описание, все метрики, обложка.
+import { Image } from 'astro:assets';
+import type { CaseEntry } from '../lib/cases';
+import ImagePlaceholder from './ImagePlaceholder.astro';
+import ResultList from './ResultList.astro';
+
+interface Props {
+  entry: CaseEntry;
+}
+
+const { title, summary, company, year, role, duration, results, cover, coverAlt } = Astro.props.entry.data;
+
+// Только заданные поля — без пустых значений и висящих « · »
+const meta = [company, year, role, duration].filter(Boolean).join(' · ');
+---
+
+<header class="case-header">
+  <div class="intro">
+    <p class="meta">{meta}</p>
+    <h1 class="title">{title}</h1>
+    <p class="summary">{summary}</p>
+    <ResultList results={results} variant="header" />
+  </div>
+
+  <div class="cover">
+    {
+      cover ? (
+        <Image
+          class="cover-img"
+          src={cover}
+          alt={coverAlt ?? ''}
+          widths={[640, 960, 1280, 1600, 2200]}
+          sizes="(min-width: 1180px) 1100px, 100vw"
+          loading="eager"
+        />
+      ) : (
+        <ImagePlaceholder label={company} ratio="16/9" />
+      )
+    }
+  </div>
+</header>
+
+<style>
+  .case-header {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: var(--space-8) var(--gutter) 0;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 52rem;
+  }
+
+  .meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .title {
+    font-size: clamp(2rem, 1.4rem + 3vw, 3.75rem);
+  }
+
+  .summary {
+    max-width: 38em;
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    line-height: 1.5;
+  }
+
+  .intro :global(.results) {
+    margin-top: var(--space-6);
+  }
+
+  .cover {
+    max-width: var(--media-max);
+    margin: var(--space-12) auto 0;
+  }
+
+  .cover-img {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+
+  @media (min-width: 1024px) {
+    .case-header {
+      padding-top: var(--space-16);
+    }
+  }
+</style>

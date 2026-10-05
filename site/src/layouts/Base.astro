@@ -1,5 +1,6 @@
 ---
 // Общий каркас всех страниц: <head> с мета-тегами, глобальные стили, <main> со слотом, футер.
+// Именованный слот «header» — для верхней панели страниц (выводится до <main>).
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
 
@@ -24,6 +25,7 @@ const { title, description } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
   </head>
   <body>
+    <slot name="header" />
     <main>
       <slot />
     </main>
