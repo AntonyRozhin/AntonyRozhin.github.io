@@ -5,7 +5,7 @@ import CaseList from '../components/CaseList.astro';
 import { site } from '../config/site';
 ---
 
-<Base title={`${site.name} — ${site.role}`} description={site.seoDescription}>
+<Base title={`${site.name} — ${site.role}`} description={site.seoDescription} ogImage={site.photo}>
   <Hero />
   <CaseList />
 </Base>

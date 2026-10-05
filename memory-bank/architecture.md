@@ -272,3 +272,31 @@ site/src/pages/404.astro      ← страница «не найдено»
 - `CaseCard`: обложка с `loading` по пропсу `eager` (только первая карточка — `eager`), `alt` = `coverAlt`, `width`/`height` и `srcset` проставляет `<Image>`, формат WebP.
 - `CaseHeader`: обложка всегда `eager` (первый экран страницы кейса).
 - Картинки в теле Markdown оптимизирует Astro (WebP, `loading="lazy"`); битый путь роняет сборку.
+
+## Этап 8 — SEO и Яндекс Метрика
+
+```
+site/
+  astro.config.mjs            ← site из SITE_URL, условный sitemap
+  public/robots.txt           ← разрешение индексации
+  src/layouts/Base.astro      ← OG-теги, Метрика
+  src/pages/index.astro       ← ogImage = site.photo
+  src/pages/cases/[slug].astro← ogImage = cover, goalOnLoad = case_open
+```
+
+### `astro.config.mjs`
+- Если есть `site/.env` — `process.loadEnvFile()` загружает его в `process.env` (не перезаписывая уже заданные переменные).
+- `site: process.env.SITE_URL || undefined`; `integrations: siteUrl ? [sitemap()] : []`. Без домена сборка не знает адреса сайта — sitemap и абсолютные ссылки не строятся, и это не ошибка.
+- `@astrojs/sitemap` создаёт `sitemap-index.xml` + `sitemap-0.xml` со всеми страницами, кроме 404.
+
+### `src/layouts/Base.astro` (SEO и аналитика)
+- **OG:** `og:type`, `og:locale` (`ru_RU`), `og:site_name` (`site.name`), `og:title` = `title`, `og:description` = `description`. При `Astro.site`: `og:url` = `Astro.url.pathname` от `site`; при `ogImage` — `getImage({ width: 1200, format: 'jpeg' })` → абсолютный `og:image`.
+- **Метрика** (только при `site.metrikaId`):
+  - `<script is:inline define:vars={{ metrikaId, goalOnLoad }}>` — Astro оборачивает код в функцию с константами; скрипт не проходит через сборщик (официальный код как есть).
+  - `ym(id, 'init', …)`; затем `reachGoal(goalOnLoad)`, если задан.
+  - Делегированный `click` на `document`: `closest('[data-goal]')` → `reachGoal(<data-goal>)`. Новые цели добавляются просто атрибутом `data-goal` в разметке.
+  - `<noscript>` с пикселем `mc.yandex.ru/watch/<id>` — в начале `<body>`.
+- Атрибуты `data-goal` сейчас: Hero — `cv_click`, `linkedin_click`, `telegram_click`; Footer — `email_click`, `telegram_click`, `linkedin_click`. Страница кейса — `goalOnLoad="case_open"`.
+
+### `public/robots.txt`
+Разрешает индексацию всего сайта. При деплое добавить строку `Sitemap: <SITE_URL>/sitemap-index.xml`.

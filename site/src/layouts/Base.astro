@@ -1,19 +1,33 @@
 ---
-// Общий каркас всех страниц: <head> с мета-тегами, глобальные стили, <main> со слотом, футер.
+// Общий каркас всех страниц: <head> с мета-тегами и Open Graph, глобальные стили,
+// Яндекс Метрика (только при site.metrikaId), <main> со слотом, футер.
 // Именованный слот «header» — для верхней панели страниц (выводится до <main>).
+import { getImage } from 'astro:assets';
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
+import { site } from '../config/site';
 
 interface Props {
   title: string;
   description: string;
-  /** Картинка для og:image — обрабатывается в этапе 8 */
+  /** Картинка для og:image; выводится только при заданном SITE_URL (нужен абсолютный адрес) */
   ogImage?: ImageMetadata;
-  /** Цель Метрики, отправляемая при загрузке страницы, — обрабатывается в этапе 8 */
+  /** Цель Метрики, отправляемая при загрузке страницы (на странице кейса — case_open) */
   goalOnLoad?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, ogImage, goalOnLoad } = Astro.props;
+
+// Абсолютные адреса строятся от site (SITE_URL); без него og:url и og:image не выводятся
+const pageUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+let ogImageUrl: string | undefined;
+if (ogImage && Astro.site) {
+  // JPEG 1200px — формат и размер, которые понимают все соцсети и мессенджеры
+  const image = await getImage({ src: ogImage, width: 1200, format: 'jpeg' });
+  ogImageUrl = new URL(image.src, Astro.site).href;
+}
+
+const { metrikaId } = site;
 ---
 
 <html lang="ru">
@@ -23,8 +37,54 @@ const { title, description } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {pageUrl && <meta property="og:url" content={pageUrl} />}
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+
+    {/*
+      Официальный код счётчика Метрики (без обработки сборщиком) + цели:
+      goalOnLoad отправляется сразу (например, case_open на странице кейса);
+      один делегированный обработчик отправляет цель из data-goal при клике.
+      Комментарии — здесь, а не в скрипте: инлайн-код попадает в HTML как есть.
+    */}
+    {
+      metrikaId && (
+        <script is:inline define:vars={{ metrikaId, goalOnLoad }}>
+          (function (m, e, t, r, i, k, a) {
+            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a);
+          })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+
+          var counterId = Number(metrikaId);
+          ym(counterId, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true });
+
+          if (goalOnLoad) ym(counterId, 'reachGoal', goalOnLoad);
+
+          document.addEventListener('click', function (event) {
+            var target = event.target instanceof Element ? event.target.closest('[data-goal]') : null;
+            if (target) ym(counterId, 'reachGoal', target.getAttribute('data-goal'));
+          });
+        </script>
+      )
+    }
   </head>
   <body>
+    {
+      metrikaId && (
+        <noscript>
+          <div>
+            <img src={`https://mc.yandex.ru/watch/${metrikaId}`} style="position:absolute; left:-9999px;" alt="" />
+          </div>
+        </noscript>
+      )
+    }
     <slot name="header" />
     <main>
       <slot />

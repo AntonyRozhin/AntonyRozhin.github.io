@@ -22,7 +22,12 @@ const { Content } = await render(entry);
 const next = await getNextCase(entry.id);
 ---
 
-<Base title={`${entry.data.title} — ${site.name}`} description={entry.data.summary}>
+<Base
+  title={`${entry.data.title} — ${site.name}`}
+  description={entry.data.summary}
+  ogImage={entry.data.cover}
+  goalOnLoad="case_open"
+>
   <header slot="header" class="topbar">
     <nav class="topbar-inner" aria-label="Навигация">
       <a class="back" href="/#cases">← Все кейсы</a>

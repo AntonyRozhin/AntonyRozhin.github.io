@@ -198,3 +198,31 @@ grep -o "Банк Санкт-Петербург · 2025 · Product Manager" dist
 ```bash
 cd site && npm run build && npm run preview   # http://localhost:4321/no-such-page → 404
 ```
+
+---
+
+## Этап 8. SEO и Яндекс Метрика — 05.10.2026
+
+**Сделано**
+- `Base.astro` — `og:type` (`website`), `og:locale`, `og:site_name`, `og:title`, `og:description`; при заданном `SITE_URL` — `og:url` и `og:image` (абсолютные). Картинка OG — `getImage()` → JPEG 1200px из `ogImage` (главная — `site.photo`, кейс — `cover`).
+- `Base.astro` — Яндекс Метрика: официальный код (`is:inline` + `define:vars`), `<noscript>`-пиксель; только при `site.metrikaId`. Цель `goalOnLoad` отправляется сразу; один делегированный обработчик кликов шлёт цель из `data-goal`.
+- `[slug].astro` — `goalOnLoad="case_open"`, `ogImage={cover}`; `index.astro` — `ogImage={site.photo}`.
+- `astro.config.mjs` — `site` из `SITE_URL` (окружение или `site/.env` через `process.loadEnvFile`), `@astrojs/sitemap` только при заданном `SITE_URL`.
+- `public/robots.txt` — `User-agent: *` / `Allow: /`, без `Sitemap` (нет домена).
+
+**Решения**
+- **`.env` читается штатным `process.loadEnvFile()` Node** (22+), без пакетов. Переменная из окружения важнее `.env`.
+- `og:image` выводится только с `SITE_URL` — соцсетям нужен абсолютный адрес. Формат JPEG (не WebP) — его понимают все соцсети и мессенджеры. Исходник меньше 1200px не увеличивается.
+- `og:type` везде `website` — интерфейс `Base` из плана не меняли ради `article`.
+- Sitemap сам исключает `404`.
+- Вебвизор в коде Метрики не включён (`clickmap`, `trackLinks`, `accurateTrackBounce`). Включить — добавить `webvisor: true` в `ym(…, 'init', {…})`.
+- Комментарии вынесены из инлайн-скрипта Метрики: `is:inline` не минифицируется, всё внутри попадает в HTML каждой страницы.
+- Цель `case_open` — при загрузке страницы кейса (не по клику по карточке): при уходе со страницы запрос может потеряться.
+
+**Как проверить**
+```bash
+cd site
+npm run build                                   # без sitemap, без og:image, без mc.yandex.ru
+SITE_URL=https://example.com npm run build      # dist/sitemap-index.xml, sitemap-0.xml (12 адресов), абсолютные og:url/og:image
+# Метрика: временно metrikaId: '12345678' в site.ts → npm run dev → /?_ym_debug=1, клики по CV/LinkedIn/Telegram/email, страница кейса → case_open
+```
