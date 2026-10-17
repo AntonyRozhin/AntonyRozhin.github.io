@@ -367,3 +367,16 @@ cd site && npm run dev   # DevTools → Device toolbar: 360/768/1024/1440/1920
 **Gotcha:** Astro кэширует отрендеренный Markdown. После правки `rehype-figure.mjs` изменения не видны, пока не удалить кэш (`rm -rf .astro node_modules/.astro`) или не перезапустить dev-сервер.
 
 **Остаётся от владельца:** экран шага 2 короткой заявки (01), «Проверка данных» и «Продолжите заполнение» (02), экраны доставки (04); на экранах вкладов «до» — дата 29.02.2024 и несходящиеся суммы; маркеры `[ЗАПОЛНИТЬ]`.
+
+---
+
+## Подготовка деплоя на GitHub Pages — 18.10.2026
+
+**Сделано**
+- `.github/workflows/deploy.yml`: при push в `master` (и вручную) — Node из `site/.nvmrc`, `npm ci`, `npm run build` с `SITE_URL=https://antonyrozhin.github.io`, публикация `site/dist` через `actions/upload-pages-artifact` + `actions/deploy-pages`.
+- `site/public/robots.txt`: добавлена строка `Sitemap: https://antonyrozhin.github.io/sitemap-index.xml`.
+- Локальная проверка: сборка с этим `SITE_URL` создаёт `sitemap-index.xml` и `sitemap-0.xml` (главная + 5 кейсов) и абсолютный `og:image`.
+
+**Решение:** репозиторий публичный и называется `AntonyRozhin.github.io` — сайт на корне домена, поэтому ссылки от `/` работают без `base`. Публичным становится весь репозиторий (включая `memory-bank/` и `Cases/`) — владелец согласился.
+
+**Осталось владельцу:** создать репозиторий, включить Settings → Pages → Source → GitHub Actions, `git remote add` + `git push`; проверить доступность `github.io` из РФ без VPN.

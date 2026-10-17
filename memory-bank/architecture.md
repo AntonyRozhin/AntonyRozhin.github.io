@@ -383,3 +383,8 @@ site/
 - **`site/src/assets/profile/photo.jpg`** — фото для hero, импортируется в `site/src/config/site.ts` (`photo`).
 - **`site/src/lib/rehype-figure.mjs`** — теперь три случая: одна картинка с `title` → `<figure>`; несколько подряд → `<div class="gallery">` из `<figure>`; ровно две → `<div class="gallery gallery--pair">` + `<span class="gallery-arrow" aria-hidden="true">→</span>` между ними. В Markdown картинки галереи пишутся подряд, каждая на своей строке, без пустой строки между ними.
 - **`site/src/pages/cases/[slug].astro`** — стили `.gallery` (flex с переносом, экраны 9,5–16rem, на 360px — по два в ряд) и `.gallery-arrow` (круг с обводкой, отрицательные поля — стрелка ложится на зазор между экранами).
+
+## Деплой (18.10.2026)
+
+- **`.github/workflows/deploy.yml`** (корень репозитория) — GitHub Actions: job `build` (рабочая папка `site/`: `npm ci` → `npm run build` с `SITE_URL`) → артефакт `site/dist` → job `deploy` публикует его на GitHub Pages. Адрес сайта задан в workflow, а не в `site/.env`: локальная сборка по-прежнему идёт без `SITE_URL`.
+- **`site/public/robots.txt`** — разрешение индексации + ссылка на `sitemap-index.xml` на `https://antonyrozhin.github.io`.
