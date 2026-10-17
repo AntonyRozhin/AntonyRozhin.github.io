@@ -1,6 +1,7 @@
 // Общие данные сайта: имя, описание, контакты, ID Метрики.
 // Компоненты берут эти значения отсюда — в вёрстке их не дублировать.
 import type { ImageMetadata } from 'astro';
+import photo from '../assets/profile/photo.jpg';
 
 export interface SiteConfig {
   /** Имя и фамилия */
@@ -32,6 +33,7 @@ export const site: SiteConfig = {
   role: 'Product Manager',
   about:
     'Product Manager с консалтинговым бэкграундом и 3+ годами опыта в продуктовом управлении. Запустил 2 продукта в FinTech и 3 продукта с нуля в EnergyTech, принеся 300+ млн ₽. Принимаю решения на основе данных.',
+  photo,
   city: 'Санкт-Петербург',
   email: 'rozhin96@mail.ru',
   phone: '+7 (953) 156-71-67',

@@ -375,3 +375,11 @@ site/
 - **`site/src/content/cases/*.md`** — пять опубликованных кейсов (order 1–5) с реальным текстом; шесть остальных скрыты `draft: true` (order 6–11) до появления текстов.
 - **`site/src/assets/cases/<slug>/`** — картинки кейсов; сейчас две схемы (`credit-preapproved`, `credit-funnel`), подключены в теле через `![alt](путь "Подпись")`.
 - **`site/src/pages/cases/[slug].astro`** — в `.prose` добавлены стили `table/th/td`: таблицы из Markdown прокручиваются внутри себя на узких экранах.
+
+## Картинки кейсов, галереи и фото (18.10.2026)
+
+- **`Cases/images/`** — исходные скриншоты владельца (`case_N.M.png`); сайт их не читает, копии с говорящими именами лежат в `site/src/assets/cases/<slug>/`.
+- **`site/src/assets/cases/<slug>/cover.png`** — обложки, собранные из экранов (композиция 1600×1000); у `pump-predictive-ai` обложка — `dashboard.png`.
+- **`site/src/assets/profile/photo.jpg`** — фото для hero, импортируется в `site/src/config/site.ts` (`photo`).
+- **`site/src/lib/rehype-figure.mjs`** — теперь три случая: одна картинка с `title` → `<figure>`; несколько подряд → `<div class="gallery">` из `<figure>`; ровно две → `<div class="gallery gallery--pair">` + `<span class="gallery-arrow" aria-hidden="true">→</span>` между ними. В Markdown картинки галереи пишутся подряд, каждая на своей строке, без пустой строки между ними.
+- **`site/src/pages/cases/[slug].astro`** — стили `.gallery` (flex с переносом, экраны 9,5–16rem, на 360px — по два в ряд) и `.gallery-arrow` (круг с обводкой, отрицательные поля — стрелка ложится на зазор между экранами).
