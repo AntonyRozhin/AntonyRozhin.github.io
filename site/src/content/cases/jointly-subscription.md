@@ -8,6 +8,7 @@ results:
   - value: "×2"
     label: "ARPU"
 order: 10
+draft: true
 ---
 
 ## Контекст

@@ -10,6 +10,7 @@ results:
   - value: "300+ млн ₽"
     label: "NPV для стейкхолдера"
 order: 8
+draft: true
 ---
 
 ## Контекст

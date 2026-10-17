@@ -8,6 +8,7 @@ results:
   - value: "×2"
     label: "Revenue"
 order: 9
+draft: true
 ---
 
 ## Контекст

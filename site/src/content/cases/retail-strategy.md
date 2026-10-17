@@ -9,7 +9,8 @@ results:
     label: "продуктовых направлений в едином roadmap"
   - value: "2 года"
     label: "горизонт стратегии"
-order: 6
+order: 7
+draft: true
 ---
 
 ## Контекст

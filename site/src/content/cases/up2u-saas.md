@@ -8,6 +8,7 @@ results:
   - value: "$100 тыс."
     label: "привлечённых инвестиций"
 order: 11
+draft: true
 ---
 
 ## Контекст

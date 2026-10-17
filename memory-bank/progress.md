@@ -325,3 +325,23 @@ cd site && npm run dev   # DevTools → Device toolbar: 360/768/1024/1440/1920
 Владелец подтвердил этап, включая проверку вкладки Network в `preview` (запросы только к `localhost`). План `implementation-plan.md` выполнен полностью: все шаги этапов 0–11 отмечены.
 
 **Дальше:** работа с контентом по разделу «Контент» в `CLAUDE.md` и данными из списка «Ждёт данных от владельца» выше. Коммитить перед крупной переработкой текстов кейсов.
+
+---
+
+## Загрузка реальных кейсов из `Cases/` — 17.10.2026
+
+Владелец подтвердил результат после проверки в браузере.
+
+**Сделано**
+- Исходники лежат в `Cases/` (5 `.md` + `schemes/`), закоммичены отдельно перед переработкой.
+- Переписаны 5 кейсов: `credit-preapproved` (order 1), `credit-funnel` (2), `deposits-autorenewal` (3), `card-delivery` (4), `pump-predictive-ai` (5). Frontmatter собран из шапки исходника (`title`, `summary`, `company`, `year`, `role`, `results` до 3 пар). Тело — Markdown исходника без H1, строки метаданных и строки «Результат» (они ушли в шапку) и без HTML-комментариев «Визуал».
+- Годы: банк — «2026», Газпромнефть НТЦ — «2024–2025» (было 2025 везде).
+- Остальные 6 кейсов (`esia-integration`, `retail-strategy`, `energytech-process-products`, `squarefi-b2b`, `jointly-subscription`, `up2u-saas`) скрыты `draft: true`, `order` 6–11. Тексты не менялись, в них остаются `[Заглушка: дописать]`.
+- Схемы подключены в тело: `site/src/assets/cases/credit-preapproved/scheme-short-application.png`, `site/src/assets/cases/credit-funnel/scheme-refinancing-steps.png` (с подписями-`figcaption`). Обложками не стали: схемы шире карточки 16:10 и обрезались бы вместе с текстом, поэтому у кейсов пока заглушка.
+- В `site/src/pages/cases/[slug].astro` добавлены стили таблиц Markdown (`.prose table`): прокрутка внутри таблицы на узких экранах, только CSS-переменные.
+
+**Ждёт данных от владельца**
+- Картинки в `Cases/images/<slug>/` (имена согласованы в чате): `credit-preapproved/{cover,screen-offer,screen-step1,screen-step2}`, `credit-funnel/{cover,refi-credits-before,refi-credits-after,card-start-before,card-start-after,data-check-before,data-check-after,continue-application}`, `deposits-autorenewal/{cover,details-before,details-after}`, `card-delivery/{cover,screen-flow-1,screen-flow-2,screen-status}`, `pump-predictive-ai/{cover,recommendation-card,scheme-flow}`. После загрузки — копировать в `site/src/assets/cases/<slug>/`, добавить `cover` + `coverAlt` и вставить `![alt](путь "Подпись")` в тело.
+- Значения шести маркеров `[ЗАПОЛНИТЬ: …]` в теле кейсов 01, 02, 04, 05 (`grep -rn "ЗАПОЛНИТЬ" site/src/content`).
+- Фото для hero → `site/src/assets/profile/photo.jpg` и `photo` в `site.ts`.
+- Тексты для 6 скрытых кейсов; после написания убрать `draft: true`.

@@ -98,6 +98,27 @@ const next = await getNextCase(entry.id);
     padding-left: 1.4em;
   }
 
+  /* Таблицы: на узком экране прокручиваются внутри себя, страница не уезжает вбок */
+  .prose :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .prose :global(th),
+  .prose :global(td) {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose :global(th) {
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
   .prose :global(li + li) {
     margin-top: var(--space-2);
   }
