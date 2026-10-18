@@ -10,21 +10,27 @@ interface Props {
   entry: CaseEntry;
   /** Грузить обложку сразу (первая карточка), остальные — лениво */
   eager: boolean;
+  /** Порядковый номер карточки на главной (с 1) и сколько всего — для «01 / 05» */
+  index: number;
+  total: number;
 }
 
-const { entry, eager } = Astro.props;
+const { entry, eager, index, total } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+const number = `${pad(index)} / ${pad(total)}`;
 const { title, summary, company, year, results, cover, coverAlt } = entry.data;
 const href = `/cases/${entry.id}/`;
 ---
 
 <article class="card" data-case-card>
   <div class="text">
+    <p class="num">{number}</p>
     <h3 class="title">
       <a class="link" href={href}>{title}</a>
     </h3>
     <p class="meta">{`${company} · ${year}`}</p>
     <p class="summary">{summary}</p>
-    <ResultList results={results} limit={3} variant="card" />
+    <ResultList results={results} limit={2} variant="card" />
     <span class="more" aria-hidden="true">Посмотреть кейс →</span>
   </div>
 
@@ -63,7 +69,7 @@ const href = `/cases/${entry.id}/`;
 
   .card:hover {
     transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-line));
+    border-color: color-mix(in srgb, var(--color-text) 30%, var(--color-line));
     box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--color-text) 30%, transparent);
   }
 
@@ -93,7 +99,18 @@ const href = `/cases/${entry.id}/`;
   }
 
   .card:hover .link {
-    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+
+  /* Номер кейса «01 / 05» — тихий редакционный элемент над заголовком */
+  .num {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
   }
 
   /* Фокус с клавиатуры обводит всю карточку */
@@ -125,13 +142,21 @@ const href = `/cases/${entry.id}/`;
     padding-top: var(--space-4);
     color: var(--color-accent);
     font-weight: 600;
+    transition: transform var(--transition);
   }
 
-  /* Визуал сверху на мобильных и планшетах */
+  .card:hover .more {
+    transform: translateX(4px);
+  }
+
+  /* Визуал сверху на мобильных и планшетах. Обложка в своих пропорциях 16:10 и прижата
+     к верху колонки — не растягивается на высоту текста, без пустот под экранами */
   .visual {
     order: -1;
+    align-self: start;
     overflow: hidden;
     border-radius: var(--radius);
+    background: var(--color-cover);
   }
 
   .cover {

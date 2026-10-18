@@ -3,14 +3,17 @@
 
 /* Дизайн-токены: все цвета, шрифт и размеры сайта задаются только здесь. */
 :root {
-  /* Палитра: нейтральные тона + один акцент */
-  --color-bg: #fafaf7;
-  --color-surface: #f0efea;
-  --color-text: #16161a;
-  --color-text-muted: #5c5c66;
-  --color-line: #e2e0d9;
-  --color-accent: #2f4bdb;
+  /* Палитра: монохром + один светлый маркер (только фоном под чернилами, не цветом текста) */
+  --color-bg: #fafaf8;
+  --color-surface: #f1f1ee;
+  --color-cover: #e8e8e2; /* подложка обложек кейсов, темнее экранов */
+  --color-text: #111111;
+  --color-text-muted: #5c5c5c;
+  --color-line: #e3e3df;
+  --color-accent: #111111; /* акцент = чернила: кнопка CV, ссылки, фокус */
+  --color-accent-hover: #333333;
   --color-on-accent: #ffffff;
+  --color-mark: #e4f59b; /* лайм: полоса под цифрами и ховеры */
 
   /* Шрифт: выбранный variable-шрифт, затем системный sans-serif */
   --font-sans: "Manrope Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -127,6 +130,11 @@ button:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-mark);
+  color: var(--color-text);
 }
 
 /* Сдержанные анимации отключаются по настройке системы */

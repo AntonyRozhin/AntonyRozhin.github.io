@@ -7,8 +7,6 @@ role: "Product Manager"
 results:
   - value: "+7%"
     label: "выдач в цифровых каналах без затрат на привлечение"
-  - value: "13,5%"
-    label: "конверсия в выдачу по короткой заявке"
   - value: "2 шага"
     label: "вместо 6 в обычной заявке"
 cover: "../../assets/cases/credit-preapproved/cover.png"

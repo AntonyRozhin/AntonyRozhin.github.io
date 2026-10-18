@@ -13,7 +13,7 @@ const cases = await getPublishedCases();
     {
       cases.map((entry, index) => (
         <div class="item" data-reveal>
-          <CaseCard entry={entry} eager={index === 0} />
+          <CaseCard entry={entry} eager={index === 0} index={index + 1} total={cases.length} />
         </div>
       ))
     }

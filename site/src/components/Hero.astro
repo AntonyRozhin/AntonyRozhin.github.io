@@ -1,6 +1,6 @@
 ---
-// Первый экран главной: имя, роль, описание, кнопки CV / LinkedIn / Telegram, фото.
-// Все данные — из site.ts.
+// Первый экран главной: маленький круглый аватар с именем и ролью, текст о себе крупно,
+// кнопки CV / LinkedIn / Telegram; справа (на десктопе) — список «Опыт». Все данные — из site.ts.
 import { Image } from 'astro:assets';
 import { site } from '../config/site';
 import ImagePlaceholder from './ImagePlaceholder.astro';
@@ -10,82 +10,136 @@ const links = [
   { label: 'LinkedIn', href: site.linkedin, goal: 'linkedin_click', primary: false },
   { label: 'Telegram', href: `https://t.me/${site.telegram}`, goal: 'telegram_click', primary: false },
 ];
+
+// Квадратный кадр для кружка; без него — фото целиком (обрежется по центру)
+const avatar = site.avatar ?? site.photo;
 ---
 
 <section class="hero" aria-labelledby="hero-name">
-  <div class="text">
-    <h1 id="hero-name" class="name">{site.name}</h1>
-    <p class="role">{site.role}</p>
-    <p class="about">{site.about}</p>
-    <ul class="buttons">
+  <div class="id">
+    <div class="avatar">
       {
-        links.map((link) => (
-          <li>
-            <a
-              class:list={['btn', { 'btn-primary': link.primary }]}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-goal={link.goal}
-            >
-              {link.label}
-            </a>
-          </li>
-        ))
+        avatar ? (
+          <Image
+            class="avatar-img"
+            src={avatar}
+            alt={`Фото: ${site.name}`}
+            widths={[96, 176]}
+            sizes="(min-width: 768px) 88px, 64px"
+            loading="eager"
+          />
+        ) : (
+          <ImagePlaceholder label="Фото" ratio="1/1" />
+        )
       }
-    </ul>
+    </div>
+    <div>
+      <h1 id="hero-name" class="name">{site.name}</h1>
+      <p class="role">{`${site.role} · ${site.city}`}</p>
+    </div>
   </div>
 
-  <div class="photo">
+  <p class="about">{site.about}</p>
+
+  <ul class="buttons">
     {
-      site.photo ? (
-        <Image
-          class="photo-img"
-          src={site.photo}
-          alt={`Фото: ${site.name}`}
-          widths={[320, 480, 640, 800]}
-          sizes="(min-width: 1024px) 400px, 22rem"
-          loading="eager"
-        />
-      ) : (
-        <ImagePlaceholder label="Фото" ratio="4/5" />
-      )
+      links.map((link) => (
+        <li>
+          <a
+            class:list={['btn', { 'btn-primary': link.primary }]}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-goal={link.goal}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))
     }
-  </div>
+  </ul>
+
+  {
+    site.experience.length > 0 && (
+      <aside class="exp" aria-labelledby="exp-title">
+        <h2 id="exp-title" class="exp-title">Опыт</h2>
+        <ol class="exp-list">
+          {site.experience.map((item) => (
+            <li class="exp-item">
+              <span class="company">{item.company}</span>
+              <span class="years">{item.years}</span>
+              <span class="exp-role">{item.role}</span>
+            </li>
+          ))}
+        </ol>
+      </aside>
+    )
+  }
 </section>
 
 <style>
   .hero {
     display: grid;
-    gap: var(--space-12);
+    gap: var(--space-8);
     max-width: var(--content-max);
     margin: 0 auto;
-    padding: var(--space-12) var(--gutter) var(--space-16);
+    padding: var(--space-12) var(--gutter);
+  }
+
+  .id {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  /* Круглый аватар: тонкая нейтральная линия, без цветного кольца */
+  .avatar {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--color-line);
+  }
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar :global(.placeholder) {
+    height: 100%;
+    padding: 0;
+    border-radius: 50%;
   }
 
   .name {
-    font-size: var(--text-display);
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
   }
 
   .role {
-    margin-top: var(--space-3);
-    color: var(--color-accent);
-    font-size: var(--text-lg);
-    font-weight: 600;
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.4;
   }
 
+  /* Текст о себе — главная фраза экрана */
   .about {
-    max-width: 36em;
-    margin-top: var(--space-6);
-    color: var(--color-text-muted);
-    font-size: var(--text-base);
+    max-width: 30em;
+    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.015em;
   }
 
   .buttons {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
-    margin-top: var(--space-8);
     list-style: none;
   }
 
@@ -102,13 +156,12 @@ const links = [
     text-decoration: none;
     transition:
       border-color var(--transition),
-      color var(--transition),
       background-color var(--transition);
   }
 
   .btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    border-color: var(--color-text);
+    background: var(--color-mark);
   }
 
   .btn-primary {
@@ -118,34 +171,87 @@ const links = [
   }
 
   .btn-primary:hover {
-    background: color-mix(in srgb, var(--color-accent) 85%, black);
-    color: var(--color-on-accent);
+    border-color: var(--color-accent-hover);
+    background: var(--color-accent-hover);
   }
 
-  .photo {
-    width: 100%;
-    max-width: 22rem;
+  /* Опыт: подпись над линией чернилами, строки через хэрлайн */
+  .exp-title {
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-text);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.4;
   }
 
-  .photo-img {
-    width: 100%;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    border-radius: var(--radius);
+  .exp-list {
+    list-style: none;
   }
 
-  /* Десктоп: текст слева, фото справа */
+  .exp-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-1) var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .company {
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .years {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .exp-role {
+    grid-column: 1 / -1;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+
+  @media (min-width: 768px) {
+    .avatar {
+      width: 88px;
+      height: 88px;
+    }
+  }
+
+  /* Десктоп: слева аватар, текст и кнопки, справа «Опыт» — начинается на уровне текста */
   @media (min-width: 1024px) {
     .hero {
-      grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem);
-      align-items: center;
-      gap: var(--space-16);
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      grid-template-areas:
+        'id .'
+        'about exp'
+        'buttons exp';
+      column-gap: var(--space-16);
+      align-items: start;
       padding-top: var(--space-24);
-      padding-bottom: var(--space-24);
+      padding-bottom: var(--space-16);
     }
 
-    .photo {
-      max-width: none;
+    .id {
+      grid-area: id;
+    }
+
+    .about {
+      grid-area: about;
+    }
+
+    .buttons {
+      grid-area: buttons;
+    }
+
+    .exp {
+      grid-area: exp;
     }
   }
 </style>

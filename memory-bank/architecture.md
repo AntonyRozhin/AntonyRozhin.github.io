@@ -13,17 +13,17 @@
 | `site/.nvmrc`, `site/.npmrc` | Node 24; `save-exact=true` | — |
 | `site/astro.config.mjs` | `site` из `SITE_URL` (env или `site/.env`), sitemap при `SITE_URL`, Markdown-процессор `satteri` + `rehype-figure` | env → конфиг сборки |
 | `site/tsconfig.json` | Строгий TypeScript Astro | — |
-| `site/src/config/site.ts` | Общие данные: имя, роль, описание, контакты, CV, Метрика, SEO | → `Base`, `Hero`, `Footer`, страницы |
+| `site/src/config/site.ts` | Общие данные: имя, роль, описание, фото (`photo` для OG, `avatar` для hero), контакты, CV, Метрика, SEO | → `Base`, `Hero`, `Footer`, страницы |
 | `site/src/content.config.ts` | Схема коллекции `cases`, проверка обложки | `.md` → типизированные записи |
 | `site/src/content/cases/<slug>.md` | 11 кейсов: frontmatter + тело | → коллекция |
 | `site/src/lib/cases.ts` | `getPublishedCases()`, `getNextCase(id)` | коллекция → списки |
 | `site/src/lib/rehype-figure.mjs` | HAST-плагин Sätteri: `<img title>` → `<figure>` + `<figcaption>` | дерево Markdown → дерево |
-| `site/src/styles/global.css` | Шрифт Manrope, токены, сброс, база, фокус, reduced motion | → все страницы через `Base` |
+| `site/src/styles/global.css` | Шрифт Manrope, токены (монохром + `--color-mark`, `--color-cover`), сброс, база, фокус, `::selection`, reduced motion | → все страницы через `Base` |
 | `site/src/layouts/Base.astro` | `<head>` (мета, OG, favicon, Метрика), слот `header`, `<main>`, `Footer` | `title`, `description`, `ogImage?`, `goalOnLoad?` |
 | `site/src/components/ImagePlaceholder.astro` | Декоративная заглушка картинки | `label`, `ratio` |
 | `site/src/components/ResultList.astro` | Метрики результатов | `results?`, `limit?`, `variant` |
-| `site/src/components/Hero.astro` | Первый экран главной | `site` |
-| `site/src/components/CaseCard.astro` | Карточка кейса (`data-case-card`) | `entry`, `eager` |
+| `site/src/components/Hero.astro` | Первый экран главной: аватар + имя + роль, текст о себе, кнопки, справа «Опыт» | `site` |
+| `site/src/components/CaseCard.astro` | Карточка кейса (`data-case-card`), номер «01 / 05» | `entry`, `eager`, `index`, `total` |
 | `site/src/components/CaseList.astro` | Секция `#cases` + анимация появления | `getPublishedCases()` |
 | `site/src/components/Footer.astro` | Футер всех страниц | `site` |
 | `site/src/components/CaseHeader.astro` | Фиксированная шапка кейса | `entry` |
@@ -388,3 +388,26 @@ site/
 
 - **`.github/workflows/deploy.yml`** (корень репозитория) — GitHub Actions: job `build` (рабочая папка `site/`: `npm ci` → `npm run build` с `SITE_URL`) → артефакт `site/dist` → job `deploy` публикует его на GitHub Pages. Адрес сайта задан в workflow, а не в `site/.env`: локальная сборка по-прежнему идёт без `SITE_URL`.
 - **`site/public/robots.txt`** — разрешение индексации + ссылка на `sitemap-index.xml` на `https://antonyrozhin.github.io`.
+
+## Редизайн: монохром и лаймовый маркер (18.10.2026)
+
+Решения приняты владельцем по итогам разбора дизайна; макеты компонентов — в дизайн-системе «Антон Рожин» (артефакт Claude). Цель: убрать акцент с фото и имени, уйти от типового синего, который сливался с синими скриншотами банка.
+
+- **`site/src/styles/global.css`** — палитра: `--color-bg #fafaf8`, `--color-surface #f1f1ee`, `--color-line #e3e3df`, `--color-text #111111`, `--color-text-muted #5c5c5c`; `--color-accent` = чернила `#111111`, новый `--color-accent-hover #333333` (вместо `color-mix(..., black)`); новые `--color-mark #e4f59b` (лайм, только фоном под чернилами) и `--color-cover #e8e8e2` (подложка обложек). Добавлен `::selection` в цвет маркера.
+- **`site/src/config/site.ts`** — новое необязательное поле `avatar` (импорт `src/assets/profile/avatar.jpg`, квадрат 600×600, кадр по плечи из `photo.jpg`). `photo` остаётся для `og:image` главной.
+- **`site/src/components/Hero.astro`** — одна колонка на всех ширинах: строка `.id` (круглый `.avatar` 64px → 88px с 768px, обводка `box-shadow 0 0 0 1px var(--color-line)`; `h1.name` ~20px; `.role` = «роль · город» шаблонной строкой) → `.about` (текст о себе крупно, 20–28px, 500, чернилами) → кнопки. `<Image>` аватара: `widths [96, 176]`, `sizes` 64/88px. Без аватара и фото — `ImagePlaceholder` 1/1 в кружке. Вторичные кнопки на ховере: рамка чернилами + фон маркера; CV — `--color-accent-hover`.
+- **`site/src/components/ResultList.astro`** — `.value` чернилами на полосе-маркере: `background: linear-gradient(to top, var(--color-mark) 0 40%, transparent 40%)`, `align-self: flex-start`, поля 0.12em (полоса чуть шире цифры).
+- **`site/src/components/CaseCard.astro`** — пропсы `index`, `total` → строка `.num` «01 / 05» (табличные цифры) над заголовком. Ховер: рамка темнеет (`color-mix` с `--color-text`), заголовок подчёркивается 2px, «Посмотреть кейс →» сдвигается на 4px. `.visual` — `align-self: start` и фон `--color-cover`: обложка в своих 16:10, не растягивается на высоту текста.
+- **`site/src/components/CaseList.astro`** — передаёт `index={index + 1}` и `total={cases.length}`.
+- **`site/src/components/NextCase.astro`** — ховер: фон и рамка маркера; заголовок больше не красится; стрелка чернилами.
+- **`site/src/components/Footer.astro`** — ховер ссылок: фон маркера вместо цвета акцента.
+- **`site/src/pages/cases/[slug].astro`** — ховер верхней панели: подчёркивание (цвет акцента = цвет текста, поэтому смена цвета не видна).
+- **`site/src/pages/404.astro`** — ховер кнопки через `--color-accent-hover`.
+- **`site/src/assets/cases/<slug>/cover.png`** (4 кейса банка) — перекрашены: голубой фон `#F2F5F9` вокруг экранов → `#E8E8E2` (только фон, связанный с краями картинки, и мягкие тени; светло-голубые фоны внутри экранов не тронуты); равные поля ~56px сверху и снизу, обрезанные снизу экраны растворяются в фон на последних 64px; у `credit-preapproved` рамка вокруг баннера перекрашена из синего акцента в чернила. Оригиналы — рядом, `cover.original.png` (не импортируются, в сборку не попадают). Обложка `pump-predictive-ai` (`dashboard.png`) не менялась.
+- **`site/public/favicon.svg`, `favicon.ico`** — квадрат `#111111` вместо синего; в `Base.astro` `?v=3`.
+
+### Доработки после проверки (18.10.2026)
+- **`ResultList.astro`** — вариант `card`: grid из двух равных колонок (`repeat(2, minmax(0, 1fr))`), `.item` без ограничения ширины; `CaseCard` передаёт `limit={2}`. Метрики всех карточек стоят в одну строку.
+- **Обложки** — перекраска пересобрана: кроме фона у краёв, перекрашиваются «карманы» фона и тени в узких зазорах между экранами (раньше там оставались голубые ромбы на обложке `credit-funnel`); поля ввода и фоны внутри экранов по-прежнему не трогаются. Источник — `cover.original.png`.
+- **`site.ts`** — из `about` убрано «принеся 300+ млн ₽».
+- **Hero, вариант с опытом (выбран владельцем)** — `site.ts`: поле `experience: { company, years, role }[]` (данные из CV; «e‑commerce» — с неразрывным дефисом `\u2011`, чтобы слово не рвалось). `Hero.astro`: после кнопок `<aside class="exp">` с `h2.exp-title` «Опыт» и `<ol>`; строка — grid «компания | годы» + роль во всю ширину. С 1024px `.hero` — grid `minmax(0,1.55fr) minmax(0,1fr)` с областями `'id .' / 'about exp' / 'buttons exp'`: «Опыт» начинается на уровне текста о себе, без подгонки отступами. Ниже 1024px — одна колонка, опыт под кнопками. Пустой `experience` — блок не выводится.
